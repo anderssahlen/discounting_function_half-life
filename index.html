@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Trial Task</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
+        #card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
+        .btn { background: #007bff; color: white; border: none; padding: 18px; margin: 10px 0; border-radius: 10px; cursor: pointer; width: 100%; font-size: 18px; font-weight: bold; }
+        #res-btn { display: none; background: #28a745; color: white; margin-top: 20px; padding: 15px; border: none; border-radius: 10px; width: 100%; font-size: 16px; }
+        #output { display: none; margin-top: 20px; background: #212529; color: #00ff00; padding: 15px; border-radius: 8px; text-align: left; font-family: monospace; font-size: 14px; white-space: pre-wrap; }
+        .info { color: #6c757d; font-size: 14px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="card">
+    <div id="ui">
+        <div class="info">Trial <span id="t-num">1</span> of 5</div>
+        <h2 id="q-text">Which do you prefer?</h2>
+        <button id="btn-now" class="btn">$500 today</button>
+        <button id="btn-later" class="btn">$1,000 in ...</button>
+    </div>
+
+    <button id="res-btn">View Results</button>
+    <div id="output"></div>
+</div>
+
+<script>
+    // 32-step ladder
+    const vals = [0.04, 0.08, 0.17, 0.25, 0.38, 0.5, 0.75, 1, 2, 3, 5, 7, 10, 14, 21, 30, 45, 60, 90, 120, 180, 270, 365, 547, 730, 1095, 1825, 2555, 3650, 5475, 7300, 9125];
+    const labs = ["1 hr", "2 hrs", "4 hrs", "6 hrs", "9 hrs", "12 hrs", "18 hrs", "1 day", "2 days", "3 days", "5 days", "1 week", "10 days", "2 weeks", "3 weeks", "1 month", "1.5 months", "2 months", "3 months", "4 months", "6 months", "9 months", "1 year", "1.5 years", "2 years", "3 years", "5 years", "7 years", "10 years", "15 years", "20 years", "25 years"];
+
+    let t = 1;
+    let idx = 14; // Start at 3 weeks
+    let s = 8;
+
+    const bNow = document.getElementById('btn-now');
+    const bLater = document.getElementById('btn-later');
+    const bRes = document.getElementById('res-btn');
+    const out = document.getElementById('output');
+
+    // Force initial state
+    function init() {
+        bLater.innerText = "$1,000 in " + labs[idx];
+    }
+
+    function step(isNow) {
+        if (isNow) idx -= s; else idx += s;
+        s = Math.max(1, s / 2);
+        t++;
+
+        if (t <= 5) {
+            document.getElementById('t-num').innerText = t;
+            bLater.innerText = "$1,000 in " + labs[idx];
+        } else {
+            document.getElementById('ui').style.display = 'none';
+            bRes.style.display = 'block';
+        }
+    }
+
+    bNow.addEventListener('click', () => step(true));
+    bLater.addEventListener('click', () => step(false));
+    bRes.addEventListener('click', () => {
+        const d = vals[idx];
+        const k = 1 / d;
+        const auc = Math.log(1 + k * 9125) / (k * 9125);
+
+        out.style.display = 'block';
+        out.innerHTML = `***  RESULTS  ***\n\n` +
+                        `Final Delay: ${labs[idx]}\n` +
+                        `ED50 (Days):  ${d.toFixed(2)}\n\n` +
+                        `k value:      ${k.toFixed(6)}\n` +
+                        `ln(k):        ${Math.log(k).toFixed(4)}\n` +
+                        `Norm. AUC:    ${auc.toFixed(4)}`;
+        bRes.style.display = 'none';
+    });
+
+    init();
+</script>
+
+</body>
+</html>
+
+
